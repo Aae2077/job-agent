@@ -8,8 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ExternalLink, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, Send, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const AVATAR_COLORS = [
+  "bg-violet-500", "bg-blue-500", "bg-emerald-500", "bg-amber-500",
+  "bg-rose-500", "bg-cyan-500", "bg-pink-500", "bg-teal-500",
+];
+
+function companyAvatarColor(company: string): string {
+  let hash = 0;
+  for (let i = 0; i < company.length; i++) {
+    hash = (hash << 5) - hash + company.charCodeAt(i);
+    hash |= 0;
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
 
 const STATUSES: { key: JobStatus; label: string }[] = [
   { key: "new", label: "New" },
@@ -144,9 +158,17 @@ export default function JobDetail() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <CardTitle className="text-lg">{job.title}</CardTitle>
-                  <p className="text-muted-foreground mt-0.5">{job.company}</p>
+                <div className="flex items-start gap-3">
+                  <div className={cn(
+                    "h-10 w-10 rounded-lg flex items-center justify-center text-sm font-bold text-white shrink-0 mt-0.5",
+                    companyAvatarColor(job.company)
+                  )}>
+                    {job.company.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg leading-tight">{job.title}</CardTitle>
+                    <p className="text-muted-foreground mt-0.5 text-sm">{job.company}</p>
+                  </div>
                 </div>
                 <Badge variant={job.status as any} className="shrink-0 mt-0.5">
                   {job.status}
@@ -221,14 +243,17 @@ export default function JobDetail() {
         {/* Chat */}
         <Card className="flex flex-col h-[620px]">
           <CardHeader className="border-b border-border pb-3">
-            <CardTitle className="text-sm font-medium">AI Assistant</CardTitle>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <CardTitle className="text-sm font-medium">AI Assistant</CardTitle>
+            </div>
             <p className="text-xs text-muted-foreground">
               Ask for a cover letter, interview prep, or role analysis
             </p>
           </CardHeader>
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
-              <div className="flex flex-col gap-2 mt-2">
+              <div className="flex flex-col gap-1.5 mt-2">
                 {[
                   "Draft a tailored cover letter",
                   "What should I research before applying?",
@@ -237,7 +262,7 @@ export default function JobDetail() {
                   <button
                     key={prompt}
                     onClick={() => setInput(prompt)}
-                    className="text-left text-xs text-muted-foreground border border-border rounded-md px-3 py-2 hover:border-blue-500/40 hover:text-foreground hover:bg-accent transition-all"
+                    className="text-left text-xs text-muted-foreground border border-border rounded-lg px-3 py-2.5 hover:border-primary/30 hover:text-foreground hover:bg-accent transition-all cursor-pointer"
                   >
                     {prompt}
                   </button>
@@ -245,26 +270,31 @@ export default function JobDetail() {
               </div>
             )}
             {messages.map((m, i) => (
-              <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+              <div key={i} className={cn("flex gap-2", m.role === "user" ? "justify-end" : "justify-start")}>
+                {m.role === "assistant" && (
+                  <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <Sparkles className="h-3 w-3 text-primary" />
+                  </div>
+                )}
                 <div
                   className={cn(
-                    "text-sm px-3 py-2 rounded-xl max-w-[85%] whitespace-pre-wrap leading-relaxed",
+                    "text-sm px-3.5 py-2.5 rounded-2xl max-w-[80%] whitespace-pre-wrap leading-relaxed",
                     m.role === "user"
-                      ? "bg-blue-600 text-white rounded-br-sm"
-                      : "bg-accent text-foreground rounded-bl-sm"
+                      ? "bg-primary text-white rounded-tr-sm"
+                      : "bg-accent text-foreground rounded-tl-sm"
                   )}
                 >
                   {m.content || (streaming && i === messages.length - 1 ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
                   ) : null)}
                 </div>
               </div>
             ))}
             <div ref={bottomRef} />
           </div>
-          <div className="p-3 border-t border-border flex gap-2">
+          <div className="p-3 border-t border-border flex gap-2 bg-background/50">
             <Textarea
-              className="flex-1"
+              className="flex-1 min-h-0 resize-none text-sm"
               rows={2}
               placeholder="Ask about this job..."
               value={input}
@@ -280,7 +310,7 @@ export default function JobDetail() {
               size="icon"
               onClick={sendMessage}
               disabled={streaming || !input.trim()}
-              className="self-end"
+              className="self-end shrink-0"
             >
               {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
