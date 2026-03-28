@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-background text-foreground min-h-screen`}>
         <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm px-6 py-3 flex items-center gap-1">
-          <Link href="/" className="font-semibold text-foreground mr-4 flex items-center gap-2">
+          <Link href="/" className="font-semibold text-foreground mr-4 flex items-center gap-2 whitespace-nowrap">
             <Briefcase className="h-4 w-4 text-blue-400" />
             Job Agent
           </Link>

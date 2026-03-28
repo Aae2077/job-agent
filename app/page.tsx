@@ -26,6 +26,7 @@ export default function JobBoard() {
   const [showAdd, setShowAdd] = useState(false);
   const [newJob, setNewJob] = useState({ title: "", company: "", url: "", description: "" });
   const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchJobs();
@@ -43,10 +44,15 @@ export default function JobBoard() {
   async function addJob() {
     if (!newJob.title || !newJob.company || adding) return;
     setAdding(true);
-    await supabase.from("jobs").insert({ ...newJob, status: "new" });
+    setAddError(null);
+    const { error } = await supabase.from("jobs").insert({ ...newJob, status: "new" });
+    setAdding(false);
+    if (error) {
+      setAddError("Failed to add job. Check your database connection.");
+      return;
+    }
     setNewJob({ title: "", company: "", url: "", description: "" });
     setShowAdd(false);
-    setAdding(false);
     fetchJobs();
   }
 
@@ -95,6 +101,9 @@ export default function JobBoard() {
               value={newJob.description}
               onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
             />
+            {addError && (
+              <p className="text-xs text-red-400">{addError}</p>
+            )}
             <div className="flex gap-2 pt-1">
               <Button size="sm" onClick={addJob} disabled={adding || !newJob.title || !newJob.company}>
                 {adding ? "Adding..." : "Add Job"}
