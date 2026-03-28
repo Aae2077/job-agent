@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 User=josh
-WorkingDirectory=/home/josh/job-scout
-ExecStart=/home/josh/job-scout/venv/bin/python /home/josh/job-scout/bot.py
+WorkingDirectory=/home/josh/job-agent/job-scout
+ExecStart=/home/josh/job-agent/job-scout/venv/bin/python /home/josh/job-agent/job-scout/bot.py
 Restart=always
 RestartSec=10
 StandardOutput=journal
