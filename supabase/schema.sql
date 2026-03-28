@@ -1,14 +1,5 @@
--- Run this in your Supabase SQL editor
-
-create table if not exists profiles (
-  id text primary key,
-  resume_text text,
-  skills text,
-  preferences text,
-  updated_at timestamptz default now()
-);
-
-create type job_status as enum ('new', 'saved', 'applied', 'interviewing', 'offer', 'rejected');
+-- Job Agent Schema
+-- Apply this in Supabase Dashboard → SQL Editor → New Query
 
 create table if not exists jobs (
   id uuid primary key default gen_random_uuid(),
@@ -17,19 +8,27 @@ create table if not exists jobs (
   url text,
   description text,
   source text,
-  status job_status not null default 'new',
+  status text not null default 'new' check (status in ('new','saved','applied','interviewing','offer','rejected')),
   notes text,
-  created_at timestamptz default now()
+  created_at timestamptz not null default now()
+);
+
+create table if not exists profiles (
+  id uuid primary key default gen_random_uuid(),
+  resume_text text,
+  skills text,
+  preferences text,
+  created_at timestamptz not null default now()
 );
 
 create table if not exists conversations (
   id uuid primary key default gen_random_uuid(),
   job_id uuid references jobs(id) on delete cascade,
   messages jsonb not null default '[]',
-  created_at timestamptz default now()
+  created_at timestamptz not null default now()
 );
 
--- Disable RLS for single-user setup (no auth)
-alter table profiles disable row level security;
+-- Disable RLS (single-user app, no auth needed)
 alter table jobs disable row level security;
+alter table profiles disable row level security;
 alter table conversations disable row level security;
