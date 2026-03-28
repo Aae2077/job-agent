@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, ExternalLink, Send, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ExternalLink, Send, Loader2, Sparkles, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const AVATAR_COLORS = [
@@ -36,6 +37,7 @@ const STATUSES: { key: JobStatus; label: string }[] = [
 
 export default function JobDetail() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const [job, setJob] = useState<Job | null>(null);
   const [notes, setNotes] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -82,6 +84,12 @@ export default function JobDetail() {
 
   async function saveNotes() {
     await supabase.from("jobs").update({ notes }).eq("id", id);
+  }
+
+  async function deleteJob() {
+    if (!confirm("Remove this job from your board?")) return;
+    await supabase.from("jobs").delete().eq("id", id);
+    router.push("/");
   }
 
   async function sendMessage() {
@@ -144,13 +152,22 @@ export default function JobDetail() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to board
-      </Link>
+      <div className="flex items-center justify-between mb-5">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to board
+        </Link>
+        <button
+          onClick={deleteJob}
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-red-400 transition-colors cursor-pointer"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+          Remove job
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Job Info */}

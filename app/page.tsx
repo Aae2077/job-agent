@@ -106,6 +106,11 @@ export default function JobBoard() {
     setLoading(false);
   }
 
+  async function deleteJob(id: string) {
+    await supabase.from("jobs").delete().eq("id", id);
+    setJobs((prev) => prev.filter((j) => j.id !== id));
+  }
+
   async function addJob() {
     if (!newJob.title || !newJob.company || adding) return;
     setAdding(true);
@@ -226,25 +231,37 @@ export default function JobBoard() {
                 <div className="rounded-lg border border-dashed border-border/50 min-h-[60px]" />
               ) : (
                 jobsByStatus(key).map((job) => (
-                  <Link key={job.id} href={`/jobs/${job.id}`}>
-                    <Card className="p-3 hover:border-primary/30 hover:bg-accent/40 transition-all cursor-pointer group">
-                      <div className="flex items-start gap-2 mb-1.5">
-                        <CompanyAvatar company={job.company} />
-                        <div className="text-xs font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2">
-                          {job.title}
+                  <div key={job.id} className="relative group">
+                    <Link href={`/jobs/${job.id}`}>
+                      <Card className="p-3 hover:border-primary/30 hover:bg-accent/40 transition-all cursor-pointer group">
+                        <div className="flex items-start gap-2 mb-1.5">
+                          <CompanyAvatar company={job.company} />
+                          <div className="text-xs font-medium leading-snug group-hover:text-primary transition-colors line-clamp-2 pr-4">
+                            {job.title}
+                          </div>
                         </div>
-                      </div>
-                      <div className="text-[11px] text-muted-foreground truncate pl-8">{job.company}</div>
-                      <div className="flex items-center justify-between mt-2 pl-8">
-                        <Badge variant={key as any} className="text-[10px] px-1.5 py-0">
-                          {label}
-                        </Badge>
-                        {job.url && (
-                          <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                        )}
-                      </div>
-                    </Card>
-                  </Link>
+                        <div className="text-[11px] text-muted-foreground truncate pl-8">{job.company}</div>
+                        <div className="flex items-center justify-between mt-2 pl-8">
+                          <Badge variant={key as any} className="text-[10px] px-1.5 py-0">
+                            {label}
+                          </Badge>
+                          {job.url && (
+                            <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          )}
+                        </div>
+                      </Card>
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        deleteJob(job.id);
+                      }}
+                      className="absolute top-1.5 right-1.5 h-4 w-4 rounded flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-400 hover:bg-red-400/10 transition-all cursor-pointer"
+                      title="Remove job"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
                 ))
               )}
             </div>
