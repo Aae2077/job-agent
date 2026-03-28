@@ -1,0 +1,110 @@
+personal:
+  name: Josh Sachs
+  email: joshs15260@gmail.com
+  phone: (510) 517-1526
+  location: Oakland / Santa Cruz, CA
+  linkedin: linkedin.com/in/josh-sachs
+  headline: Aspiring Sales Engineer combining technical fluency with client-facing communication experience
+
+education:
+  - institution: University of California, Santa Cruz
+    degree: Bachelor of Arts (B.A.) in Computer Science
+    dates: Sep 2022 - Jun 2026 (Expected)
+    location: Santa Cruz, CA
+    coursework:
+      - Data Structures
+      - Systems Design
+      - Databases
+
+skills:
+  technical:
+    - Python
+    - C
+    - C++
+    - JavaScript
+    - Zapier
+    - RealScout
+    - Follow Up Boss (CRM)
+    - Google Sheets API
+    - Gmail API
+    - Google Suite
+    - Adobe Suite
+  core:
+    - Workflow Automation
+    - Data Structures
+    - Basic Machine Learning
+    - Problem Solving
+  soft:
+    - Leadership
+    - Public Speaking
+    - Adaptability
+    - Team Development
+    - Cold Calling
+    - Client-facing Communication
+    - Demo Scheduling
+    - Sales Prospecting
+
+experience:
+  - title: Workflow & Automation Intern, Engineer
+    company: Cush Real Estate
+    location: Oakland, CA
+    dates: Jun 2025 - Present
+    bullets:
+      - "Automated lead routing for 10+ agents using Zapier, RealScout, and Follow Up Boss, cutting processing time by 90%"
+      - "Implemented Python tool to synchronize local realtor data, by region, into Google Sheets, enabling streamlined outreach and simplifying reporting"
+      - "Built three-stage Action Plan workflow, improving pipeline visibility, raising follow-up compliance by 35%"
+      - "Authored daily analytics briefs for founders, translating technical sales metrics into actionable business recommendations to cut operating costs"
+      - "Hired as Automation Engineer following successful internship"
+      - "Led RealScout platform transition -- evaluated, recommended, and onboarded 10+ agents"
+    key_metrics:
+      - "90% reduction in lead routing processing time"
+      - "35% improvement in follow-up compliance"
+      - "10+ agents onboarded to new platform"
+    narrative: "Was on the buying side of a sales engineer interaction during the RealScout evaluation and it made me want to do this full-time"
+
+  - title: Sales Engineering Intern
+    company: Shockproof
+    location: Remote
+    dates: May 2025 - Present
+    bullets:
+      - "Built automation sending 50 targeted outreach emails a day from a 3000+ contact list, improving outreach efficiency by 80%, using Python, JavaScript, Google Sheets and Gmail APIs"
+      - "Implemented task scheduler, triggering emails and validating successful operation"
+      - "Managed client demo scheduling via Google Sheets, ensuring coordination between sales and technical teams"
+      - "Navigated complex org structures at banks to reach decision-makers"
+      - "Conducted cold calling outreach as part of sales prospecting workflow"
+    key_metrics:
+      - "50 targeted emails per day"
+      - "3000+ contact list"
+      - "80% improvement in outreach efficiency"
+
+leadership:
+  - title: Vice President of Member Integration
+    organization: Alpha Kappa Psi, Chi Gamma Chapter
+    location: Santa Cruz, CA
+    dates: Jun 2025 - Nov 2025
+    bullets:
+      - "Led a 16-member initiate class that raised $6.5K in under 7 weeks through coordinated fundraising events"
+      - "Ran a 7-week professional development program with alumni workshops, interview preparation, and weekly accountability checkpoints"
+
+  - title: Conservationist
+    organization: Operation Wallacea
+    location: Fiji
+    dates: Jun 2022 - Jul 2022
+    bullets:
+      - "Collected data for AI model linking satellite imagery with on-site biomass measurements and endangered-species observations to estimate carbon sequestration for governmental policy-making on environment and land-use"
+
+  - title: Team Leader
+    organization: Amor Ministries
+    location: Mexico
+    dates: Dec 2021 - Apr 2022
+    bullets:
+      - "Led a 10-person student team building housing for an under-resourced family and managed on-site logistics"
+
+cover_letter_style:
+  strengths:
+    - Story-led openings work best
+    - Lead with genuine company interest specific to that company
+    - Strong closer with logistics line
+    - Personal and specific beats formulaic every time
+  key_narrative: "I have been on the buying side of a sales engineer interaction (RealScout evaluation) and it made me want to do this full-time"
+  voice: "Direct, enthusiastic, technically literate but people-first. No corporate fluff."

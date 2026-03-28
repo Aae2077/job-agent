@@ -1,0 +1,16 @@
+[Unit]
+Description=Job Scout Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+User=josh
+WorkingDirectory=/home/josh/job-scout
+ExecStart=/home/josh/job-scout/venv/bin/python /home/josh/job-scout/bot.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,4 +1,14 @@
+# Next.js
 .next/
 node_modules/
 .env.local
 .env*.local
+.gstack/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+job-scout/venv/
+job-scout/.env
+job-scout/*.db
