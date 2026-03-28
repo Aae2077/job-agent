@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, X, ExternalLink } from "lucide-react";
+import { Plus, X, ExternalLink, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_COLUMNS: { key: JobStatus; label: string }[] = [
@@ -92,6 +92,7 @@ export default function JobBoard() {
   const [newJob, setNewJob] = useState({ title: "", company: "", url: "", description: "" });
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [fetchingDesc, setFetchingDesc] = useState(false);
 
   useEffect(() => {
     fetchJobs();
@@ -104,6 +105,23 @@ export default function JobBoard() {
       .order("created_at", { ascending: false });
     setJobs(data ?? []);
     setLoading(false);
+  }
+
+  async function fetchDescription() {
+    if (!newJob.url || fetchingDesc) return;
+    setFetchingDesc(true);
+    try {
+      const res = await fetch("/api/jobs/fetch-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: newJob.url }),
+      });
+      const data = await res.json();
+      if (data.description) setNewJob((j) => ({ ...j, description: data.description }));
+      else setAddError("Couldn't fetch description — paste it manually.");
+    } finally {
+      setFetchingDesc(false);
+    }
   }
 
   async function deleteJob(id: string) {
@@ -180,13 +198,25 @@ export default function JobBoard() {
               value={newJob.company}
               onChange={(e) => setNewJob({ ...newJob, company: e.target.value })}
             />
-            <Input
-              placeholder="URL"
-              value={newJob.url}
-              onChange={(e) => setNewJob({ ...newJob, url: e.target.value })}
-            />
+            <div className="flex gap-2">
+              <Input
+                placeholder="Job posting URL"
+                value={newJob.url}
+                onChange={(e) => setNewJob({ ...newJob, url: e.target.value })}
+                className="flex-1"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={fetchDescription}
+                disabled={!newJob.url || fetchingDesc}
+                title="Auto-fetch job description from URL"
+              >
+                {fetchingDesc ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Fetch"}
+              </Button>
+            </div>
             <Textarea
-              placeholder="Job description (paste here for AI assistance)"
+              placeholder="Job description — auto-filled after Fetch, or paste manually"
               rows={4}
               value={newJob.description}
               onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}

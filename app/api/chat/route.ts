@@ -13,11 +13,11 @@ export async function POST(req: NextRequest) {
 
   const db = createServiceClient();
 
-  // Load user profile
+  // Load user profile (single-user app, fixed ID)
   const { data: profile } = await db
     .from("profiles")
     .select("*")
-    .eq("id", "default")
+    .eq("id", "00000000-0000-0000-0000-000000000001")
     .single();
 
   // Load job if provided
