@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { supabase, type Profile } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { CheckCircle2 } from "lucide-react";
 
-// Single-user: we use a fixed profile row with id = 'default'
 const PROFILE_ID = "default";
 
 export default function ProfilePage() {
@@ -13,6 +16,7 @@ export default function ProfilePage() {
     preferences: "",
   });
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchProfile();
@@ -24,62 +28,85 @@ export default function ProfilePage() {
   }
 
   async function saveProfile() {
+    setSaving(true);
     await supabase
       .from("profiles")
       .upsert({ id: PROFILE_ID, ...profile })
       .eq("id", PROFILE_ID);
+    setSaving(false);
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => setSaved(false), 2500);
   }
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-xl font-semibold mb-1">Your Profile</h1>
-      <p className="text-sm text-gray-500 mb-6">
-        This background is injected into every AI conversation so it can personalize its responses.
-      </p>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold">Your Profile</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          This background is injected into every AI conversation so Claude can personalize its responses.
+        </p>
+      </div>
 
-      <div className="space-y-5">
-        <div>
-          <label className="block text-sm font-medium mb-1">Resume / Background</label>
-          <p className="text-xs text-gray-500 mb-2">Paste your resume text, a bio, or a summary of your experience.</p>
-          <textarea
-            className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm resize-none"
-            rows={10}
-            value={profile.resume_text ?? ""}
-            onChange={(e) => setProfile({ ...profile, resume_text: e.target.value })}
-            placeholder="Paste your resume or work history here..."
-          />
-        </div>
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Resume / Background</CardTitle>
+            <CardDescription>
+              Paste your resume text, a bio, or a summary of your experience.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              rows={10}
+              value={profile.resume_text ?? ""}
+              onChange={(e) => setProfile({ ...profile, resume_text: e.target.value })}
+              placeholder="Paste your resume or work history here..."
+            />
+          </CardContent>
+        </Card>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Key Skills</label>
-          <textarea
-            className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm resize-none"
-            rows={3}
-            value={profile.skills ?? ""}
-            onChange={(e) => setProfile({ ...profile, skills: e.target.value })}
-            placeholder="e.g. Sales, Python, TypeScript, Claude API, customer success..."
-          />
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Key Skills</CardTitle>
+            <CardDescription>A list of your technical and professional skills.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              rows={3}
+              value={profile.skills ?? ""}
+              onChange={(e) => setProfile({ ...profile, skills: e.target.value })}
+              placeholder="e.g. Sales, Python, TypeScript, Claude API, customer success..."
+            />
+          </CardContent>
+        </Card>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Job Preferences</label>
-          <textarea
-            className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm resize-none"
-            rows={3}
-            value={profile.preferences ?? ""}
-            onChange={(e) => setProfile({ ...profile, preferences: e.target.value })}
-            placeholder="e.g. Looking for sales or technical roles at AI/dev tools companies. Prefer SF or remote. Targeting SDR/AE or growth roles."
-          />
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Job Preferences</CardTitle>
+            <CardDescription>What you're targeting -- helps Claude give better recommendations.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              rows={3}
+              value={profile.preferences ?? ""}
+              onChange={(e) => setProfile({ ...profile, preferences: e.target.value })}
+              placeholder="e.g. Looking for sales or technical roles at AI/dev tools companies. Prefer SF or remote. Targeting SDR/AE or growth roles."
+            />
+          </CardContent>
+        </Card>
 
-        <button
-          onClick={saveProfile}
-          className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-4 py-2 rounded"
-        >
-          {saved ? "Saved!" : "Save Profile"}
-        </button>
+        <Button onClick={saveProfile} disabled={saving}>
+          {saved ? (
+            <>
+              <CheckCircle2 className="h-4 w-4" />
+              Saved
+            </>
+          ) : saving ? (
+            "Saving..."
+          ) : (
+            "Save Profile"
+          )}
+        </Button>
       </div>
     </div>
   );

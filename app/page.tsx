@@ -3,14 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase, type Job, type JobStatus } from "@/lib/supabase";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Plus, X, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const STATUS_COLUMNS: { key: JobStatus; label: string; color: string }[] = [
-  { key: "new", label: "New", color: "bg-blue-900/40 border-blue-700" },
-  { key: "saved", label: "Saved", color: "bg-purple-900/40 border-purple-700" },
-  { key: "applied", label: "Applied", color: "bg-yellow-900/40 border-yellow-700" },
-  { key: "interviewing", label: "Interviewing", color: "bg-orange-900/40 border-orange-700" },
-  { key: "offer", label: "Offer", color: "bg-green-900/40 border-green-700" },
-  { key: "rejected", label: "Rejected", color: "bg-red-900/40 border-red-700" },
+const STATUS_COLUMNS: { key: JobStatus; label: string }[] = [
+  { key: "new", label: "New" },
+  { key: "saved", label: "Saved" },
+  { key: "applied", label: "Applied" },
+  { key: "interviewing", label: "Interviewing" },
+  { key: "offer", label: "Offer" },
+  { key: "rejected", label: "Rejected" },
 ];
 
 export default function JobBoard() {
@@ -18,6 +25,7 @@ export default function JobBoard() {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [newJob, setNewJob] = useState({ title: "", company: "", url: "", description: "" });
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     fetchJobs();
@@ -33,13 +41,12 @@ export default function JobBoard() {
   }
 
   async function addJob() {
-    if (!newJob.title || !newJob.company) return;
-    await supabase.from("jobs").insert({
-      ...newJob,
-      status: "new",
-    });
+    if (!newJob.title || !newJob.company || adding) return;
+    setAdding(true);
+    await supabase.from("jobs").insert({ ...newJob, status: "new" });
     setNewJob({ title: "", company: "", url: "", description: "" });
     setShowAdd(false);
+    setAdding(false);
     fetchJobs();
   }
 
@@ -48,77 +55,91 @@ export default function JobBoard() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-semibold">Job Board</h1>
-        <button
-          onClick={() => setShowAdd(!showAdd)}
-          className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1.5 rounded"
-        >
-          + Add Job
-        </button>
+        <div>
+          <h1 className="text-xl font-semibold">Job Board</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">{jobs.length} jobs tracked</p>
+        </div>
+        <Button size="sm" onClick={() => setShowAdd(!showAdd)}>
+          <Plus className="h-3.5 w-3.5" />
+          Add Job
+        </Button>
       </div>
 
       {showAdd && (
-        <div className="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-700 max-w-lg">
-          <h2 className="text-sm font-medium mb-3">Add Job Manually</h2>
-          <div className="space-y-2">
-            <input
-              className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm"
+        <Card className="mb-6 p-5 max-w-lg">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium">Add Job Manually</h2>
+            <button onClick={() => setShowAdd(false)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="space-y-2.5">
+            <Input
               placeholder="Job title *"
               value={newJob.title}
               onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
             />
-            <input
-              className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm"
+            <Input
               placeholder="Company *"
               value={newJob.company}
               onChange={(e) => setNewJob({ ...newJob, company: e.target.value })}
             />
-            <input
-              className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm"
+            <Input
               placeholder="URL"
               value={newJob.url}
               onChange={(e) => setNewJob({ ...newJob, url: e.target.value })}
             />
-            <textarea
-              className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm"
+            <Textarea
               placeholder="Job description (paste here for AI assistance)"
               rows={4}
               value={newJob.description}
               onChange={(e) => setNewJob({ ...newJob, description: e.target.value })}
             />
-            <div className="flex gap-2">
-              <button onClick={addJob} className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1.5 rounded">
-                Add
-              </button>
-              <button onClick={() => setShowAdd(false)} className="text-gray-400 hover:text-white text-sm px-3 py-1.5">
+            <div className="flex gap-2 pt-1">
+              <Button size="sm" onClick={addJob} disabled={adding || !newJob.title || !newJob.company}>
+                {adding ? "Adding..." : "Add Job"}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
       {loading ? (
-        <p className="text-gray-500 text-sm">Loading...</p>
+        <div className="flex items-center justify-center h-48">
+          <p className="text-sm text-muted-foreground">Loading jobs...</p>
+        </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {STATUS_COLUMNS.map(({ key, label, color }) => (
-            <div key={key} className={`rounded-lg border p-3 ${color}`}>
-              <div className="text-xs font-semibold uppercase tracking-wide mb-2 text-gray-300">
-                {label} <span className="text-gray-500">({jobsByStatus(key).length})</span>
+          {STATUS_COLUMNS.map(({ key, label }) => (
+            <div key={key} className="flex flex-col gap-2">
+              <div className="flex items-center justify-between px-1">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {label}
+                </span>
+                <span className="text-xs text-muted-foreground bg-muted rounded-full px-1.5 py-0.5 leading-none">
+                  {jobsByStatus(key).length}
+                </span>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 min-h-[80px]">
                 {jobsByStatus(key).map((job) => (
-                  <Link
-                    key={job.id}
-                    href={`/jobs/${job.id}`}
-                    className="block bg-gray-900 rounded p-2 hover:bg-gray-800 transition-colors"
-                  >
-                    <div className="text-sm font-medium truncate">{job.title}</div>
-                    <div className="text-xs text-gray-400 truncate">{job.company}</div>
-                    <div className="text-xs text-gray-600 mt-1">
-                      {new Date(job.created_at).toLocaleDateString()}
-                    </div>
+                  <Link key={job.id} href={`/jobs/${job.id}`}>
+                    <Card className="p-3 hover:border-blue-500/40 hover:bg-accent/30 transition-all cursor-pointer group">
+                      <div className="text-sm font-medium leading-snug group-hover:text-blue-300 transition-colors line-clamp-2">
+                        {job.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 truncate">{job.company}</div>
+                      <div className="flex items-center justify-between mt-2">
+                        <Badge variant={key as any} className="text-[10px] px-1.5 py-0">
+                          {label}
+                        </Badge>
+                        {job.url && (
+                          <ExternalLink className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        )}
+                      </div>
+                    </Card>
                   </Link>
                 ))}
               </div>
