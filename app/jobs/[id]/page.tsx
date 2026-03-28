@@ -79,26 +79,33 @@ export default function JobDetail() {
     setStreaming(true);
     setMessages([...newMessages, { role: "assistant", content: "" }]);
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages, jobId: id }),
-    });
-
-    if (!res.body) return;
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
     let full = "";
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages, jobId: id }),
+      });
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value);
-      full += chunk;
-      setMessages([...newMessages, { role: "assistant", content: full }]);
+      if (!res.ok) {
+        setMessages([...newMessages, { role: "assistant", content: "Something went wrong. Please try again." }]);
+        return;
+      }
+
+      if (!res.body) return;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        full += chunk;
+        setMessages([...newMessages, { role: "assistant", content: full }]);
+      }
+    } finally {
+      setStreaming(false);
     }
-
-    setStreaming(false);
     const finalMessages = [...newMessages, { role: "assistant", content: full }];
 
     if (convId) {

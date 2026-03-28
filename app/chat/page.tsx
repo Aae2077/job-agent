@@ -31,26 +31,33 @@ export default function GeneralChat() {
     setStreaming(true);
     setMessages([...newMessages, { role: "assistant", content: "" }]);
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages }),
-    });
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newMessages }),
+      });
 
-    if (!res.body) return;
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let full = "";
+      if (!res.ok) {
+        setMessages([...newMessages, { role: "assistant", content: "Something went wrong. Please try again." }]);
+        return;
+      }
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      full += decoder.decode(value);
-      setMessages([...newMessages, { role: "assistant", content: full }]);
-      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      if (!res.body) return;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let full = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        full += decoder.decode(value);
+        setMessages([...newMessages, { role: "assistant", content: full }]);
+        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+      }
+    } finally {
+      setStreaming(false);
     }
-
-    setStreaming(false);
   }
 
   return (
