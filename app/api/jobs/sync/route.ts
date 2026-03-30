@@ -10,6 +10,7 @@ const STATUS_MAP: Record<string, string> = {
   offer:        "offer",
   rejected:     "rejected",
   withdrawn:    "rejected",
+  dismissed:    "dismissed",
 };
 
 export async function POST(req: NextRequest) {

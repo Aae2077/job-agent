@@ -8,7 +8,7 @@ create table if not exists jobs (
   url text,
   description text,
   source text,
-  status text not null default 'new' check (status in ('new','saved','applied','interviewing','offer','rejected')),
+  status job_status not null default 'new',
   notes text,
   created_at timestamptz not null default now()
 );

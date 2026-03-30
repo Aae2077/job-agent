@@ -39,3 +39,14 @@ See [TESTING.md](./TESTING.md) for conventions.
 - `lib/claude.ts` — system prompt builder + `buildSystemPrompt()`
 - `lib/supabase.ts` — DB client + TypeScript types
 - `components/ui/` — shadcn/ui components (Button, Card, Input, Textarea, Badge)
+
+## Memory
+
+Persistent memory for this project lives in `C:\Users\joshs\job-agent-memory\`.
+
+At the start of each session, read:
+- `job-agent.md` — project context and search criteria
+- `rejection-patterns.md` — recent dismissals from Discord (last 20 rows)
+
+Update `job-agent.md` when priorities change, new decisions are made, or active work shifts.
+The bot on the VPS appends to `rejection-patterns.md` automatically when you dismiss a job with a reason.

@@ -19,7 +19,8 @@ export type JobStatus =
   | "applied"
   | "interviewing"
   | "offer"
-  | "rejected";
+  | "rejected"
+  | "dismissed";
 
 export type Job = {
   id: string;
