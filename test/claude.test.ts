@@ -6,7 +6,7 @@ vi.mock("@anthropic-ai/sdk", () => ({
   },
 }));
 
-import { buildSystemPrompt } from "@/lib/claude";
+import { buildSystemPrompt, buildInterviewPrepPrompt } from "@/lib/claude";
 import type { Profile, Job } from "@/lib/supabase";
 
 const baseProfile: Profile = {
@@ -73,5 +73,57 @@ describe("buildSystemPrompt", () => {
 
   it("handles null profile gracefully", () => {
     expect(() => buildSystemPrompt(null)).not.toThrow();
+  });
+});
+
+describe("buildInterviewPrepPrompt", () => {
+  const prepJob: Job = {
+    id: "3",
+    title: "SDR",
+    company: "Anthropic",
+    url: null,
+    description: "We are looking for an SDR to drive outbound pipeline.",
+    source: "linkedin",
+    status: "interviewing",
+    notes: null,
+    created_at: new Date().toISOString(),
+  };
+
+  it("includes interview coach instructions", () => {
+    const prompt = buildInterviewPrepPrompt(null, null);
+    expect(prompt).toContain("STAR");
+    expect(prompt).toContain("interview coach");
+  });
+
+  it("includes profile background when provided", () => {
+    const prompt = buildInterviewPrepPrompt(baseProfile, null);
+    expect(prompt).toContain("5 years in sales at Acme Corp");
+    expect(prompt).toContain("Python, Salesforce, cold calling");
+  });
+
+  it("includes job title and company when provided", () => {
+    const prompt = buildInterviewPrepPrompt(null, prepJob);
+    expect(prompt).toContain("SDR");
+    expect(prompt).toContain("Anthropic");
+  });
+
+  it("includes job description (truncated to 3000 chars)", () => {
+    const prompt = buildInterviewPrepPrompt(null, prepJob);
+    expect(prompt).toContain("outbound pipeline");
+  });
+
+  it("uses fallback text when job description is null", () => {
+    const jobNoDesc: Job = { ...prepJob, description: null };
+    const prompt = buildInterviewPrepPrompt(null, jobNoDesc);
+    expect(prompt).toContain("No job description available");
+    expect(prompt).toContain("SDR");
+  });
+
+  it("handles null profile gracefully", () => {
+    expect(() => buildInterviewPrepPrompt(null, prepJob)).not.toThrow();
+  });
+
+  it("handles null job gracefully", () => {
+    expect(() => buildInterviewPrepPrompt(baseProfile, null)).not.toThrow();
   });
 });

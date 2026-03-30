@@ -35,17 +35,16 @@ function SkeletonCard() {
   );
 }
 
-function StatPill({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
+function StatPill({ label, value, highlight }: { label: string; value: number | string; highlight?: boolean }) {
+  const isHighlighted = highlight && (typeof value === "number" ? value > 0 : true);
   return (
     <div className={cn(
       "flex items-center gap-2 px-4 py-2.5 rounded-lg border",
-      highlight && value > 0
-        ? "bg-primary/5 border-primary/20"
-        : "bg-card border-border"
+      isHighlighted ? "bg-primary/5 border-primary/20" : "bg-card border-border"
     )}>
       <span className={cn(
         "text-xl font-bold tabular-nums",
-        highlight && value > 0 ? "text-primary" : "text-foreground"
+        isHighlighted ? "text-primary" : "text-foreground"
       )}>
         {value}
       </span>
@@ -120,6 +119,31 @@ export default function JobBoard() {
     applied: jobs.filter((j) => j.status === "applied").length,
     interviewing: jobs.filter((j) => j.status === "interviewing").length,
     offers: jobs.filter((j) => j.status === "offer").length,
+    interviewRate: (() => {
+      const throughApplied = jobs.filter((j) =>
+        ["applied", "interviewing", "offer", "rejected"].includes(j.status)
+      );
+      const converted = jobs.filter((j) =>
+        ["interviewing", "offer"].includes(j.status)
+      );
+      return throughApplied.length >= 3
+        ? Math.round((converted.length / throughApplied.length) * 100)
+        : null;
+    })(),
+    topSource: (() => {
+      const bySource: Record<string, { total: number; converted: number }> = {};
+      for (const job of jobs) {
+        if (!job.source) continue;
+        if (!["applied", "interviewing", "offer", "rejected"].includes(job.status)) continue;
+        bySource[job.source] ??= { total: 0, converted: 0 };
+        bySource[job.source].total++;
+        if (["interviewing", "offer"].includes(job.status)) bySource[job.source].converted++;
+      }
+      const entries = Object.entries(bySource).filter(([, v]) => v.total >= 2);
+      if (!entries.length) return null;
+      entries.sort((a, b) => b[1].converted / b[1].total - a[1].converted / a[1].total);
+      return { source: entries[0][0], converted: entries[0][1].converted };
+    })(),
   };
 
   return (
@@ -142,6 +166,12 @@ export default function JobBoard() {
           <StatPill label="Applied" value={stats.applied} />
           <StatPill label="Interviewing" value={stats.interviewing} highlight />
           <StatPill label="Offers" value={stats.offers} highlight />
+          {stats.interviewRate !== null && (
+            <StatPill label="interview rate" value={`${stats.interviewRate}%`} highlight={stats.interviewRate > 0} />
+          )}
+          {stats.topSource && (
+            <StatPill label={`interviews via ${stats.topSource.source}`} value={stats.topSource.converted} highlight />
+          )}
         </div>
       )}
 

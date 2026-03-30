@@ -1,14 +1,15 @@
 import { NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase";
-import { buildSystemPrompt, anthropic } from "@/lib/claude";
+import { buildSystemPrompt, buildInterviewPrepPrompt, anthropic } from "@/lib/claude";
 import type { Message } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
-  const { messages, jobId } = (await req.json()) as {
+  const { messages, jobId, mode } = (await req.json()) as {
     messages: Message[];
     jobId?: string;
+    mode?: "general" | "interview_prep";
   };
 
   const db = createServiceClient();
@@ -27,7 +28,10 @@ export async function POST(req: NextRequest) {
     job = data;
   }
 
-  const systemPrompt = buildSystemPrompt(profile, job);
+  const systemPrompt =
+    mode === "interview_prep"
+      ? buildInterviewPrepPrompt(profile, job)
+      : buildSystemPrompt(profile, job);
 
   // Stream response
   const encoder = new TextEncoder();
