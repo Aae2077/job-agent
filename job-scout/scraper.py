@@ -11,6 +11,7 @@ import logging
 import re
 import time
 import requests
+import yaml
 from datetime import datetime, timezone
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
@@ -48,6 +49,11 @@ logging.basicConfig(
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "scraper_config.json")
 with open(_CONFIG_PATH) as _f:
     _cfg = json.load(_f)
+
+# Load candidate profile — edit candidate_profile.yaml to personalize the AI filters
+_PROFILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "candidate_profile.yaml")
+with open(_PROFILE_PATH) as _pf:
+    _profile = yaml.safe_load(_pf)
 
 SEARCH_TERMS = _cfg["search_terms"]
 INTERN_SEARCH_TERMS = _cfg["intern_search_terms"]
@@ -288,16 +294,18 @@ def claude_relevance_check(job):
     vault_context = get_vault_rejection_context()
     combined_context = "\n".join(filter(None, [rejection_context, vault_context]))
 
-    prompt = f"""You are filtering job postings for Josh Sachs, a new grad CS student graduating June 2026 from UC Santa Cruz.
+    p = _profile["main_roles"]
+    disq = "\n".join(f"- {d}" for d in p["disqualifiers"])
+    prompt = f"""You are filtering job postings for {_profile["name"]}, a {_profile["background"]}.
 
 Target profile:
-- Roles: SDR, BDR, Sales Development, Sales Engineer, Solutions Engineer, Account Development, Technical Sales, entry-level AE
-- Industry: Tech, SaaS, AI, Automation only (no healthcare, insurance, staffing agencies)
-- Location: Bay Area (SF, Oakland, East Bay, South Bay/Peninsula) or Remote
-- Pay: $55k+ base with path to $100k+ via OTE or fast promotion
-- Experience: suitable for 0-2 years (does NOT need to say "new grad" explicitly)
-- Internships: include sales/GTM/BD internships at well-known tech companies with high intern-to-FT conversion
-- Exclude: roles requiring 3+ years experience, non-English language requirements, non-tech industries
+- Roles: {p["target_roles"]}
+- Industry: {p["industry"]}
+- Location: {p["locations"]}
+- Pay: {p["min_pay"]}
+- Experience: {p["experience_level"]}
+- Internships: {p["include_internships"]}
+- Exclude: {disq}
 
 {combined_context}
 
@@ -336,30 +344,16 @@ Respond with JSON only:
 def claude_prompt_eng_check(job):
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    prompt = f"""You are evaluating whether a job posting is a good fit for Josh Sachs, a CS student graduating June 2026 from UC Santa Cruz who is interested in Prompt Engineer / AI Engineer roles.
+    pe = _profile["prompt_eng_roles"]
+    pe_disq = "\n".join(f"- {d}" for d in pe["disqualifiers"])
+    prompt = f"""You are evaluating whether a job posting is a good fit for {_profile["name"]}, a {_profile["background"]} who is interested in Prompt Engineer / AI Engineer roles.
 
-Josh's relevant qualifications:
-- B.A. Computer Science, UC Santa Cruz (graduating June 2026)
-- Python (strong), JavaScript, C, C++
-- Built and shipped automation tools using LLM APIs (Anthropic Claude API)
-- Experience with workflow automation: Zapier, Google Sheets API, Gmail API
-- Built AI-powered job scout tool using Claude for relevance scoring
-- Basic Machine Learning coursework
-- 2 internships involving automation engineering and sales engineering
-- No prior dedicated "AI/ML engineer" role, but hands-on LLM API usage
-
-What makes Josh a fit for prompt engineer roles:
-- Direct experience writing prompts for Claude (structured JSON output, multi-criteria filtering)
-- Built production tools with LLM APIs
-- CS fundamentals (data structures, systems, databases)
-- Strong Python
-
-What would disqualify Josh:
-- Roles requiring 3+ years experience
-- Roles requiring ML research background (PhD/MS level)
-- Roles requiring deep model training/fine-tuning expertise
-- Non-tech industry
-- Non-Bay Area and not remote
+Relevant qualifications:
+{pe["qualifications"]}
+What makes them a fit for prompt engineer roles:
+{pe["strengths"]}
+What would disqualify them:
+{pe_disq}
 
 Job posting:
 Title: {job.get("title")}
@@ -367,7 +361,7 @@ Company: {job.get("company")}
 Location: {job.get("location")}
 Description (first 3500 chars): {str(job.get("description") or "")[:3500]}
 
-Assess whether Josh is genuinely qualified and whether this is worth applying to.
+Assess whether the candidate is genuinely qualified and whether this is worth applying to.
 Respond with JSON only:
 {{
   "relevant": true or false,
@@ -397,31 +391,19 @@ Respond with JSON only:
 def claude_comms_check(job):
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    prompt = f"""You are evaluating whether a job posting is a good fit for Josh Sachs, a CS student graduating June 2026 from UC Santa Cruz who is targeting communications and community roles at tech companies.
+    cr = _profile["comms_roles"]
+    cr_disq = "\n".join(f"- {d}" for d in cr["disqualifiers"])
+    prompt = f"""You are evaluating whether a job posting is a good fit for {_profile["name"]}, a {_profile["background"]} who is targeting communications and community roles at tech companies.
 
-Josh's relevant qualifications for comms roles:
-- B.A. Computer Science, UC Santa Cruz (graduating June 2026) -- gives technical credibility
-- VP of Member Integration at Alpha Kappa Psi: ran a 7-week professional development program, led fundraising raising $6.5K in 7 weeks, alumni workshops, interview prep
-- Authored daily analytics briefs for founders at Cush Real Estate (translating technical metrics into business recommendations)
-- Client-facing communication, demo scheduling, cold calling at Shockproof
-- Public speaking, leadership, team development
-- Python/JavaScript -- can write scripts, build tooling, work with developer audiences
+Relevant qualifications:
+{cr["qualifications"]}
+Best-fit roles:
+{cr["best_fit_roles"]}
+What would disqualify them:
+{cr_disq}
 
-Best-fit roles for Josh:
-- Developer Advocate / Developer Relations (strong fit: CS + communication skills)
-- Marketing Communications Coordinator at a tech/SaaS company
-- Community Manager at a tech company
-- Content Marketing at a tech/SaaS/AI company
-- Technical Writer entry level
-
-What would disqualify Josh:
-- Roles requiring 3+ years experience
-- PR/comms at non-tech industries (healthcare, finance, law)
-- Roles requiring an existing large social media following or journalism background
-- Senior-level strategy roles
-
-Location: Bay Area or Remote only.
-Pay: $50k+ base.
+Location: {cr["locations"]}.
+Pay: {cr["min_pay"]}.
 
 Job posting:
 Title: {job.get("title")}

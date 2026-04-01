@@ -1,0 +1,74 @@
+# ─────────────────────────────────────────────────────────────
+# experience_kb.yaml — your resume data for the AI
+#
+# This file is used by tailor.py to generate tailored resumes
+# and cover letters. Fill in your own details below.
+#
+# To get started: copy this file to experience_kb.yaml and edit it.
+#   cp experience_kb.yaml.example experience_kb.yaml
+# ─────────────────────────────────────────────────────────────
+
+personal:
+  name: "Your Full Name"
+  email: "you@example.com"
+  phone: "(555) 000-0000"
+  location: "City, State"
+  linkedin: "linkedin.com/in/your-handle"
+  headline: "One-sentence professional headline"
+
+education:
+  - institution: "University Name"
+    degree: "Bachelor of Science in Computer Science"
+    dates: "Sep 2021 - Jun 2025 (Expected)"
+    location: "City, State"
+    coursework:
+      - "Data Structures"
+      - "Add relevant courses"
+
+skills:
+  technical:
+    - "Python"
+    - "JavaScript"
+    - "Add your technical skills"
+  core:
+    - "Problem Solving"
+    - "Add core skills"
+  soft:
+    - "Communication"
+    - "Add soft skills"
+
+experience:
+  - title: "Job Title"
+    company: "Company Name"
+    location: "City, State"
+    dates: "Month Year - Present"
+    bullets:
+      - "What you accomplished and the impact (use numbers where possible)"
+      - "Another achievement"
+    key_metrics:
+      - "Quantified impact #1"
+      - "Quantified impact #2"
+    narrative: "The story behind why this experience matters for your target roles"
+
+  - title: "Previous Job Title"
+    company: "Previous Company"
+    location: "City, State"
+    dates: "Month Year - Month Year"
+    bullets:
+      - "What you accomplished"
+    key_metrics:
+      - "Quantified impact"
+
+leadership:
+  - title: "Leadership Role"
+    organization: "Organization Name"
+    location: "City, State"
+    dates: "Month Year - Month Year"
+    bullets:
+      - "What you led and the outcome"
+
+cover_letter_style:
+  strengths:
+    - "What makes your cover letters work (e.g. story-led, specific to company)"
+  key_narrative: "The one story that ties your background to your target role"
+  voice: "How you want to sound (e.g. direct, enthusiastic, technically literate)"

@@ -1,91 +1,124 @@
 # Job Agent
 
-An AI-powered job tracking system with two tightly integrated components:
+An AI-powered job tracking system. It scrapes LinkedIn every 30 minutes, filters jobs through Claude, alerts you on Discord, and tracks your whole pipeline — from first alert to offer.
 
-- **Discord Bot + Scraper** (`job-scout/`) — scrapes LinkedIn every 30 minutes, filters jobs through Claude, alerts you on Discord, and lets you manage your pipeline with emoji reactions
-- **Web UI** (`app/`) — a kanban board + AI chat assistant deployed on Vercel, backed by Supabase
-
-Both halves share the same database. Jobs found by the scraper appear on your board automatically. Reacting 📨 on Discord moves the card to Applied. Status changes in either place stay in sync.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fjsho0%2Fjob-agent&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,ANTHROPIC_API_KEY,INGEST_API_KEY&envDescription=See%20README%20for%20where%20to%20get%20each%20value&project-name=job-agent&repository-name=job-agent)
 
 ---
 
-## Architecture
+## Fastest setup: use Claude Code
+
+If you have [Claude Code](https://claude.ai/code) installed, the easiest way to personalize this repo is to open it and run:
+
+```
+/setup
+```
+
+Claude will walk you through every question — your background, target roles, location, resume, cover letter voice — and write all the config files for you. No code editing needed.
+
+---
+
+## What it does
 
 ```
 LinkedIn ──▶ scraper.py ──▶ Claude (relevance filter) ──▶ Discord alert
-                                                       └──▶ Supabase jobs table
-                                                                    │
-Discord reaction (📨) ──▶ bot.py ──▶ Supabase status update        │
-                                                                    ▼
-                                                          Web UI (Vercel)
-                                                          Kanban board + AI chat
+                                                       └──▶ Supabase
+                                                                │
+Discord reaction (📨) ──▶ bot.py ──▶ status update             │
+                                                                ▼
+                                                     Web UI (Vercel)
+                                                     Kanban + AI chat
 ```
 
----
-
-## Part 1 — Discord Bot + Scraper
-
-### What it does
-
-- Scrapes LinkedIn for SDR, BDR, Sales Engineer, Solutions Engineer, DevRel, Prompt Engineer, and GTM roles
-- Filters each job through Claude Haiku — checks experience requirements, location, industry, salary, and freshness
-- Only alerts you on roles posted under 2 hours ago OR with fewer than 10 applicants (apply early)
-- Sends rich Discord embeds with fit score, applicant count, and freshness flags
-- Lets you manage your pipeline with reactions and commands from Discord
-- Mirrors every status change to the web UI in real time
-
-### Reactions on job alert messages
-
-| Reaction | What happens |
-|----------|-------------|
-| ✅ | Generates a tailored resume + cover letter via `tailor.py` and posts it in Discord |
-| 📨 | Marks the job as Applied in your tracker and moves it to Applied on the web board |
-| ❌ | Dismisses the job and asks why — uses your reasons to improve future filtering |
-
-### Bot commands
-
-| Command | Description |
-|---------|-------------|
-| `!applied <url> <Company> - <Role>` | Manually log an application |
-| `!status <url> <status>` | Update status: `phone_screen`, `interview`, `offer`, `rejected`, `withdrawn` |
-| `!tracker` | Show your full application pipeline |
-| `!stats` | Application stats + top rejection reasons |
-| `!note <url> <note>` | Add a note to an application |
-| `!help` | Show all commands |
-
-### #requests channel
-
-Post a job URL or PDF in your `#requests` channel and the bot will ask what you want:
-
-- `tailor my resume and cover letter`
-- `just the cover letter, startup tone`
-- `tailor everything, note I have a referral there`
-
-Reply `skip` to use defaults.
+- **Discord alerts** — rich embeds with fit score, applicant count, freshness
+- **Kanban board** — New → Saved → Applied → Interviewing → Offer → Rejected
+- **AI chat** — cover letters, interview prep, and role analysis per job
+- **Reaction shortcuts** — ✅ tailors your resume, 📨 logs application, ❌ dismisses and learns why
 
 ---
 
-### Setup
+## Two parts
 
-#### Prerequisites
+| Part | What it does | Where it runs |
+|------|-------------|---------------|
+| **Web UI** (`app/`) | Kanban board + AI assistant | Vercel (free) |
+| **Discord Bot + Scraper** (`job-scout/`) | Scrapes LinkedIn, alerts on Discord | Linux VPS |
 
-- Python 3.10+
+You can run just the web UI without the bot, or both together.
+
+---
+
+## Quick start — Web UI only (15 minutes)
+
+### 1. Fork this repo
+
+Click **Fork** at the top of this page. You need your own copy to deploy.
+
+### 2. Create a Supabase project
+
+1. Go to [supabase.com](https://supabase.com) → New project
+2. Open **SQL Editor** → paste the contents of [`supabase/schema.sql`](supabase/schema.sql) → Run
+3. Go to **Settings → API** and copy:
+   - **Project URL** → `NEXT_PUBLIC_SUPABASE_URL`
+   - **anon public** key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - **service_role** key → `SUPABASE_SERVICE_ROLE_KEY`
+
+> **After deploying:** Run this SQL to lock down your database:
+> ```sql
+> ALTER TABLE jobs ENABLE ROW LEVEL SECURITY;
+> ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+> ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+> ```
+
+### 3. Get an Anthropic API key
+
+Sign up at [console.anthropic.com](https://console.anthropic.com) → API keys → Create key.
+
+### 4. Deploy to Vercel
+
+Click the **Deploy with Vercel** button at the top of this README, or:
+
+1. Go to [vercel.com](https://vercel.com) → Add New Project → Import your fork
+2. Add these environment variables:
+
+| Variable | Where to get it |
+|----------|----------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Settings → API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Settings → API |
+| `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
+| `INGEST_API_KEY` | Any secret string you choose (e.g. `my-secret-key-123`) |
+
+3. Click Deploy. Done.
+
+### 5. Personalize your profile
+
+Open your deployed app → click **Profile** → fill in your background, skills, and preferences. The AI reads this for every cover letter and interview prep session.
+
+---
+
+## Quick start — Discord Bot + Scraper
+
+The bot needs a Linux server (VPS). [Hostinger](https://hostinger.com) has cheap options (~$4/mo).
+
+### Prerequisites
+
 - A Discord server where you are admin
 - A Discord bot token ([discord.com/developers](https://discord.com/developers/applications))
-- An Anthropic API key ([console.anthropic.com](https://console.anthropic.com))
-- A Linux server or VPS (the scraper runs as a cron job)
+- An Anthropic API key
+- A Linux VPS
 
-#### 1. Clone and install
+### 1. Clone on your VPS
 
 ```bash
-git clone https://github.com/jsho0/job-agent.git
+git clone https://github.com/YOUR-USERNAME/job-agent.git
 cd job-agent/job-scout
 python3 -m venv venv
 source venv/bin/activate
-pip install anthropic jobspy discord.py discord-webhook python-dotenv requests beautifulsoup4 pypdf
+pip install anthropic jobspy discord.py discord-webhook python-dotenv requests beautifulsoup4 pypdf pyyaml
 ```
 
-#### 2. Configure environment
+### 2. Set up your environment
 
 ```bash
 cp .env.example .env
@@ -96,67 +129,68 @@ nano .env
 |----------|----------------|
 | `DISCORD_BOT_TOKEN` | Discord Developer Portal → your app → Bot → Token |
 | `DISCORD_WEBHOOK_URL` | Discord server → channel settings → Integrations → Webhooks |
-| `DISCORD_CHANNEL_ID` | Right-click the job alerts channel → Copy Channel ID |
-| `REQUESTS_CHANNEL_ID` | Right-click the #requests channel → Copy Channel ID |
-| `DISCORD_USER_ID` | Discord settings → Advanced → Developer Mode on → right-click yourself → Copy User ID |
+| `DISCORD_CHANNEL_ID` | Right-click job alerts channel → Copy Channel ID |
+| `REQUESTS_CHANNEL_ID` | Right-click #requests channel → Copy Channel ID |
+| `DISCORD_USER_ID` | Discord settings → Advanced → Developer Mode → right-click yourself → Copy User ID |
 | `ANTHROPIC_API_KEY` | [console.anthropic.com](https://console.anthropic.com) |
-| `INGEST_URL` | Your web UI URL e.g. `https://your-app.vercel.app` (optional) |
-| `INGEST_API_KEY` | Any secret string you choose — must match Vercel env var (optional) |
+| `INGEST_URL` | Your Vercel app URL + `/api/jobs/ingest` (e.g. `https://my-app.vercel.app/api/jobs/ingest`) |
+| `INGEST_API_KEY` | The same secret string you set in Vercel |
 
-#### 3. Discord bot permissions
+### 3. Discord bot setup
 
-In the Discord Developer Portal:
+In the [Discord Developer Portal](https://discord.com/developers/applications):
 1. Bot → enable **Message Content Intent** and **Server Members Intent**
 2. OAuth2 → URL Generator → scopes: `bot` → permissions: `Send Messages`, `Read Message History`, `Add Reactions`, `Attach Files`
 3. Use the generated URL to invite the bot to your server
 
-#### 4. Customize the scraper for yourself
+### 4. Personalize for yourself
 
-Open `scraper.py` and update these sections to match your target profile:
+**Option A: Claude Code (recommended)**
+Open the repo in Claude Code and run `/setup` — it will ask you everything and write the files.
 
-```python
-# What roles to search for
-SEARCH_TERMS = [
-    "Sales Development Representative",
-    "BDR SaaS",
-    # add your own
-]
+**Option B: Edit manually**
 
-# What locations to search
-LOCATIONS = [
-    "San Francisco, CA",
-    "New York, NY",
-]
-
-# Companies you really want (get gold color in Discord)
-WATCHLIST_COMPANIES = [
-    "stripe", "anthropic", "openai",
-]
+**`scraper_config.json`** — what to search for:
+```json
+{
+  "search_terms": ["SDR tech", "Sales Engineer entry level"],
+  "locations": ["San Francisco, CA", "Remote"],
+  "watchlist_companies": ["anthropic", "openai", "stripe"]
+}
 ```
 
-The `claude_relevance_check()` function contains a profile prompt — update it to describe your own experience level, target roles, and what disqualifies a role for you.
+**`candidate_profile.yaml`** — who you are (what Claude reads when filtering jobs):
+```yaml
+name: "Your Name"
+background: "Recent CS grad, graduating May 2025 from State University"
+main_roles:
+  target_roles: "SDR, BDR, Sales Engineer"
+  locations: "NYC or Remote"
+  min_pay: "$60k+ base"
+```
 
-#### 5. Run the scraper
+**`experience_kb.yaml`** — your resume (used for cover letter generation):
+```bash
+cp experience_kb.yaml.example experience_kb.yaml
+nano experience_kb.yaml
+```
+
+### 5. Run the scraper
 
 ```bash
-# Test run
+# Test it once
 source venv/bin/activate
 python scraper.py
 
 # Schedule with cron (every 30 minutes)
 crontab -e
-# Add this line:
-# */30 * * * * /path/to/job-scout/venv/bin/python /path/to/job-scout/scraper.py
+# Add:
+# */30 * * * * /home/you/job-agent/job-scout/venv/bin/python /home/you/job-agent/job-scout/scraper.py
 ```
 
-#### 6. Run the bot (persistent)
+### 6. Run the bot (persistent)
 
 ```bash
-# Test
-source venv/bin/activate
-python bot.py
-
-# As a systemd service (Linux)
 # Edit job-scout-bot.service — update WorkingDirectory and ExecStart to your actual path
 sudo cp job-scout-bot.service /etc/systemd/system/
 sudo systemctl enable jobscout-bot
@@ -165,66 +199,44 @@ sudo systemctl start jobscout-bot
 
 ---
 
-## Part 2 — Web UI
+## Reactions and commands
 
-A Next.js kanban board with an AI chat assistant. Jobs flow in automatically from the scraper; you can also add them manually with one-click URL scraping to auto-fill the description.
+### Reactions on job alert messages
 
-### Features
+| Reaction | What happens |
+|----------|-------------|
+| ✅ | Generates tailored resume + cover letter via Claude |
+| 📨 | Marks the job as Applied and syncs to the web board |
+| ❌ | Dismisses and asks why — uses your reasons to improve future filtering |
 
-- Kanban board: New → Saved → Applied → Interviewing → Offer → Rejected
-- Company logos via Clearbit (falls back to colored initials)
-- Stats bar: total tracked, applied, interviewing, offers
-- Add Job form with **Fetch** button — paste a URL and it auto-fills the description
-- Per-job AI chat: cover letters, interview prep, role analysis grounded in your profile
-- General career chat: resume feedback, cold outreach drafts, interview prep
-- Profile page: edit your background, skills, preferences — the AI reads this on every chat
+### #requests channel
 
-### Setup
+Post any job URL or PDF in your `#requests` channel and the bot will ask what you want:
+- `tailor my resume and cover letter`
+- `just the cover letter, startup tone`
+- `tailor everything, I have a referral there`
 
-#### 1. Supabase
+### Bot commands
 
-1. Create a project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor → New query**, paste the contents of `supabase/schema.sql`, and run it
-3. Note your **Project URL**, **anon public key**, and **service_role key** from Settings → API
-
-#### 2. Deploy to Vercel
-
-Connect your fork to Vercel for auto-deploy on push, or use the CLI:
-
-```bash
-npm i -g vercel
-vercel
-```
-
-#### 3. Environment variables
-
-Set these in Vercel dashboard → Settings → Environment Variables:
-
-| Variable | Value |
-|----------|-------|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon public key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role key |
-| `ANTHROPIC_API_KEY` | Your Anthropic API key |
-| `INGEST_API_KEY` | Same secret string you set in the bot `.env` |
-
-#### 4. Local development
-
-```bash
-npm install
-cp .env.local.example .env.local  # fill in the same vars
-npm run dev
-```
+| Command | Description |
+|---------|-------------|
+| `!tracker` | Full pipeline view |
+| `!stats` | Stats + top rejection reasons |
+| `!applied <url> <Company> - <Role>` | Manually log an application |
+| `!status <url> <status>` | Update status |
+| `!note <url> <text>` | Add a note |
+| `!help` | All commands |
 
 ---
 
 ## Deploying updates
 
 ```bash
-# Push changes — Vercel auto-deploys the web UI
-git add -A && git commit -m "your message" && git push origin master
+# Web UI — push to GitHub, Vercel auto-deploys
+git push origin master
 
-# On the VPS — pull latest and restart the bot
+# VPS — pull and restart
+ssh you@your-server
 cd ~/job-agent && git pull
 sudo systemctl restart jobscout-bot
 ```
@@ -237,7 +249,18 @@ sudo systemctl restart jobscout-bot
 |-------|------|
 | Web UI | Next.js 16, TypeScript, Tailwind CSS, shadcn/ui |
 | Database | Supabase (PostgreSQL) |
-| AI | Anthropic Claude (sonnet-4-6 for chat, haiku-4-5 for job filtering) |
+| AI | Anthropic Claude (sonnet-4-6 for chat, haiku-4-5 for filtering) |
 | Hosting | Vercel |
 | Scraping | JobSpy, BeautifulSoup |
 | Bot | discord.py |
+
+---
+
+## Local development
+
+```bash
+npm install
+cp .env.local.example .env.local  # fill in your Supabase + Anthropic keys
+npm run dev                        # http://localhost:3000
+npm test                           # run tests
+```
