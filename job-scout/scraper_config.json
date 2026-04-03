@@ -69,6 +69,28 @@
     "previously posted", "originally posted", "posting again",
     "reactivated", "re-listed", "relisted", "re-opening"
   ],
+  "prompt_eng_search_terms": [
+    "Prompt Engineer entry level",
+    "AI Engineer entry level",
+    "LLM Engineer entry level",
+    "AI Product Manager entry level"
+  ],
+  "comms_search_terms": [
+    "Developer Relations entry level",
+    "DevRel entry level",
+    "Technical Community Manager entry level",
+    "Developer Advocate entry level"
+  ],
+  "nonsales_titles": [
+    "software engineer", "data engineer", "mechanical engineer",
+    "electrical engineer", "hardware engineer", "systems engineer",
+    "civil engineer", "structural engineer", "chemical engineer",
+    "nurse", "physician", "therapist", "dentist", "teacher",
+    "scientist", "researcher", "attorney", "paralegal",
+    "manufacturing engineer", "controls engineer", "field service",
+    "penetration tester", "cybersecurity analyst",
+    "marketing coordinator", "graphic designer", "social media manager"
+  ],
   "nonfinance_titles": [
     "software engineer", "data engineer", "mechanical engineer",
     "electrical engineer", "hardware engineer", "systems engineer",

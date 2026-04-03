@@ -38,8 +38,31 @@ EXPERIENCE_FILTER_RE = re.compile(
     re.IGNORECASE
 )
 
+# Hard filter: jobs requiring a completed bachelor's degree (not open to current undergrads).
+# Applied to non-intern searches only -- intern postings are exempt.
+DEGREE_REQUIRED_RE = re.compile(
+    r"bachelor['\u2019]?s?\s+degree\s+(?:is\s+)?required"
+    r"|require[sd]?\s+(?:a\s+)?(?:bachelor['\u2019]?s?\s+degree|b\.?[as]\.?\s+degree|four[- ]year\s+degree)"
+    r"|must\s+have\s+(?:a\s+)?(?:bachelor['\u2019]?s?\s+degree|b\.?[as]\.?\s+degree)"
+    r"|(?:b\.?[as]\.?|bachelor['\u2019]?s?)\s+degree\s+(?:or\s+equivalent\s+)?(?:is\s+)?required"
+    r"|minimum\s+education[:\s]+(?:bachelor|b\.?[as]\.?)"
+    r"|education\s+requirements?[:\s]+(?:bachelor|b\.?[as]\.?)",
+    re.IGNORECASE
+)
+
+# Exemption: description signals it's open to current undergrads despite degree language.
+UNDERGRAD_OK_RE = re.compile(
+    r"currently\s+pursuing|working\s+toward\s+(?:a\s+)?(?:degree|bachelor)"
+    r"|enrolled\s+in\s+(?:a\s+)?(?:bachelor|undergraduate|college|university)"
+    r"|rising\s+(?:junior|senior|sophomore)"
+    r"|current\s+(?:undergraduate|college|university)\s+student"
+    r"|pursuing\s+(?:a\s+)?(?:bachelor|b\.?[as]\.?|undergraduate)"
+    r"|expected\s+graduation|anticipated\s+graduation"
+    r"|(?:junior|senior|sophomore)\s+(?:standing|year|student)",
+    re.IGNORECASE
+)
+
 logging.basicConfig(
-    filename="/var/log/jobscraper.log",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %I:%M:%S %p"
@@ -248,7 +271,7 @@ def get_rejection_context():
         conn.close()
         if not rows:
             return ""
-        lines = ["Josh has recently passed on these roles and here's why (use this to calibrate):"]
+        lines = ["Aiden has recently passed on these roles and here's why (use this to calibrate):"]
         for title, company, reason in rows:
             lines.append(f"  - {title} @ {company}: \"{reason}\"")
         return "\n".join(lines)
@@ -570,6 +593,14 @@ def process_jobs(jobs_df, conn, is_intern=False, is_remote=False, is_prompt_eng=
             logging.info(f"Experience filtered: {job_dict.get('title')} @ {job_dict.get('company')} -- 5+ years requirement found")
             mark_seen(conn, job_url, job_dict.get("title"), job_dict.get("company"))
             continue
+
+        # Hard degree filter: skip non-intern jobs that require a completed bachelor's degree
+        # unless the description also signals it's open to current undergrads.
+        if not is_intern and desc_text and DEGREE_REQUIRED_RE.search(desc_text):
+            if not UNDERGRAD_OK_RE.search(desc_text):
+                logging.info(f"Degree filtered: {job_dict.get('title')} @ {job_dict.get('company')} -- requires completed degree")
+                mark_seen(conn, job_url, job_dict.get("title"), job_dict.get("company"))
+                continue
 
         title_repost = is_repost_by_title(conn, job_dict.get("title", ""), job_dict.get("company", ""))
         repost = page_repost or detect_repost(job_dict)

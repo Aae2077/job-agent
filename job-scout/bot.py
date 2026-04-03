@@ -27,7 +27,7 @@ CHANNEL_ID = int(os.getenv("DISCORD_CHANNEL_ID", "0"))
 REQUESTS_CHANNEL_ID = int(os.getenv("REQUESTS_CHANNEL_ID", "0"))
 DISCORD_USER_ID = int(os.getenv("DISCORD_USER_ID", "0"))
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-VENV_PYTHON = os.path.join(SCRIPT_DIR, "venv", "bin", "python")
+VENV_PYTHON = os.path.join(SCRIPT_DIR, "venv", "Scripts", "python") if os.name == "nt" else os.path.join(SCRIPT_DIR, "venv", "bin", "python")
 DB_PATH = os.path.join(SCRIPT_DIR, "jobs.db")
 INGEST_URL = os.getenv("INGEST_URL", "https://job-agent-henna.vercel.app")
 INGEST_API_KEY = os.getenv("INGEST_API_KEY")
@@ -74,7 +74,6 @@ pending_rejections = {}
 pending_requests = {}
 
 logging.basicConfig(
-    filename="/var/log/jobscout_bot.log",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s"
 )
@@ -309,7 +308,7 @@ async def on_raw_reaction_add(payload):
             )
             if result.returncode != 0:
                 logging.error(f"tailor.py stderr: {result.stderr}")
-                await channel.send(f"<@{payload.user_id}> Something went wrong. Check `/var/log/jobscout_tailor.log`")
+                await channel.send(f"<@{payload.user_id}> Something went wrong generating your documents. Check the bot terminal for details.")
         except subprocess.TimeoutExpired:
             await channel.send(f"<@{payload.user_id}> Tailoring timed out. Try again.")
         except Exception as e:

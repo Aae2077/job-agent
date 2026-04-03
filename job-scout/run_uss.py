@@ -31,8 +31,8 @@ resume_pdf, cover_pdf, analysis = tailor.tailor(
 )
 
 for pdf, name in [
-    (resume_pdf, "SachsResume_united-site-services.pdf"),
-    (cover_pdf,  "SachsCoverLetter_united-site-services.pdf"),
+    (resume_pdf, "AidenResume_united-site-services.pdf"),
+    (cover_pdf,  "AidenCoverLetter_united-site-services.pdf"),
 ]:
     print(f"{'Saved' if pdf and os.path.exists(pdf) else 'FAILED'}: {name}")
 

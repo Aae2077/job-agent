@@ -42,10 +42,9 @@ KB_PATH           = os.path.join(SCRIPT_DIR, "experience_kb.yaml")
 RESUME_TEMPLATE   = os.path.join(SCRIPT_DIR, "SachsResumeTemplate.tex")
 COVER_TEMPLATE    = os.path.join(SCRIPT_DIR, "SachsCoverLetterTemplate.tex")
 OUTPUT_DIR        = os.getenv("OUTPUT_DIR", os.path.join(SCRIPT_DIR, "output"))
-SACHSPROF_PATH    = os.getenv("SACHSPROF_PATH", "")   # set in .env for local Windows runs
+PROF_OUTPUT_PATH  = os.getenv("SACHSPROF_PATH", os.getenv("PROF_OUTPUT_PATH", ""))  # local output dir override
 
 logging.basicConfig(
-    filename="/var/log/jobscout_tailor.log",
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s"
 )
@@ -189,7 +188,7 @@ def trim_to_one_page(data, slug, output_dir):
 
     for attempt in range(10):
         tex = build_resume_tex({**data, 'resume': resume})
-        pdf = compile_pdf(tex, f'SachsResume_{slug}', output_dir)
+        pdf = compile_pdf(tex, f'AidenResume_{slug}', output_dir)
         if pdf is None:
             return None, tex
 
@@ -217,7 +216,7 @@ def trim_cover_to_one_page(data, slug, client, output_dir):
     """Compile cover letter. If > 1 page, ask Claude to shorten paragraphs and retry once."""
     cl = data.get('cover_letter', {})
     cover_tex = build_cover_tex(data)
-    cover_pdf = compile_pdf(cover_tex, f'SachsCoverLetter_{slug}', output_dir)
+    cover_pdf = compile_pdf(cover_tex, f'AidenCoverLetter_{slug}', output_dir)
 
     pages = count_pages(cover_pdf)
     if pages is None or pages <= 1:
@@ -245,7 +244,7 @@ P3: {cl.get('paragraph_3', '')}"""}]
         if shorter:
             updated = {**data, 'cover_letter': shorter}
             cover_tex = build_cover_tex(updated)
-            cover_pdf = compile_pdf(cover_tex, f'SachsCoverLetter_{slug}', output_dir)
+            cover_pdf = compile_pdf(cover_tex, f'AidenCoverLetter_{slug}', output_dir)
             logging.info(f"Cover letter recompiled after shortening: {count_pages(cover_pdf)} page(s)")
     except Exception as e:
         logging.warning(f"Cover trim failed: {e}")
@@ -336,7 +335,7 @@ def tailor(job_url, job_description=None, custom_prompt=""):
     logging.info("Pass 2: Matching experience")
     matching = parse_json_response(client.messages.create(
         model="claude-sonnet-4-6", max_tokens=1000,
-        messages=[{"role": "user", "content": f"""Match Josh's experience to this job. Only use facts from the KB.
+        messages=[{"role": "user", "content": f"""Match the candidate's experience to this job. Only use facts from the KB.
 
 KB:
 {kb_str}
@@ -361,7 +360,7 @@ Return JSON only:
     custom_section = f"\nADDITIONAL INSTRUCTIONS FROM USER:\n{custom_prompt}\n" if custom_prompt else ""
     structured = parse_json_response(client.messages.create(
         model="claude-sonnet-4-6", max_tokens=3000,
-        messages=[{"role": "user", "content": f"""Generate a tailored application for Josh Sachs applying to {analysis.get("role_title")} at {analysis.get("company")}.
+        messages=[{"role": "user", "content": f"""Generate a tailored application for Aiden Canales applying to {analysis.get("role_title")} at {analysis.get("company")}.
 
 RULES:
 - Only use real experience from the KB. Never fabricate metrics or responsibilities.
@@ -409,13 +408,13 @@ Return JSON only:
 
     # Fallback: save .tex files if pdflatex unavailable
     if resume_pdf is None:
-        path = os.path.join(OUTPUT_DIR, f'SachsResume_{slug}.tex')
+        path = os.path.join(OUTPUT_DIR, f'AidenResume_{slug}.tex')
         with open(path, 'w', encoding='utf-8') as f:
             f.write(build_resume_tex(structured))
         logging.warning(f"Resume PDF failed -- .tex saved to {path}")
 
     if cover_pdf is None:
-        path = os.path.join(OUTPUT_DIR, f'SachsCoverLetter_{slug}.tex')
+        path = os.path.join(OUTPUT_DIR, f'AidenCoverLetter_{slug}.tex')
         with open(path, 'w', encoding='utf-8') as f:
             f.write(build_cover_tex(structured))
         logging.warning(f"Cover PDF failed -- .tex saved to {path}")
@@ -453,9 +452,9 @@ async def send_to_discord(channel_id, job_url, resume_pdf, cover_pdf, analysis):
 
             files = []
             if resume_pdf and os.path.exists(resume_pdf):
-                files.append(discord.File(resume_pdf, filename=f"SachsResume_{company}.pdf"))
+                files.append(discord.File(resume_pdf, filename=f"AidenResume_{company}.pdf"))
             if cover_pdf and os.path.exists(cover_pdf):
-                files.append(discord.File(cover_pdf, filename=f"SachsCoverLetter_{company}.pdf"))
+                files.append(discord.File(cover_pdf, filename=f"AidenCoverLetter_{company}.pdf"))
 
             await channel.send(
                 content=f"**{role} @ {company}**\n{job_url}",
@@ -508,12 +507,12 @@ def main():
         asyncio.run(send_to_discord(channel_id, job_url, resume_pdf, cover_pdf, analysis))
     else:
         # CLI mode: copy to SACHSPROF_PATH if configured, else leave in OUTPUT_DIR
-        dest = SACHSPROF_PATH if SACHSPROF_PATH and os.path.isdir(SACHSPROF_PATH) else OUTPUT_DIR
+        dest = PROF_OUTPUT_PATH if PROF_OUTPUT_PATH and os.path.isdir(PROF_OUTPUT_PATH) else OUTPUT_DIR
         slug = analysis.get("company_slug", "company")
 
         for src, name in [
-            (resume_pdf, f"SachsResume_{slug}.pdf"),
-            (cover_pdf,  f"SachsCoverLetter_{slug}.pdf"),
+            (resume_pdf, f"AidenResume_{slug}.pdf"),
+            (cover_pdf,  f"AidenCoverLetter_{slug}.pdf"),
         ]:
             if src and os.path.exists(src):
                 final = os.path.join(dest, name)
