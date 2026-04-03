@@ -1,6 +1,8 @@
 -- Job Agent Schema
 -- Apply this in Supabase Dashboard → SQL Editor → New Query
 
+create type if not exists job_status as enum ('new', 'applied', 'interviewing', 'offered', 'rejected', 'dismissed');
+
 create table if not exists jobs (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -36,25 +38,33 @@ alter table conversations disable row level security;
 -- Seed default profile (upsert so re-running schema is safe)
 insert into profiles (id, resume_text, skills, preferences) values (
   '00000000-0000-0000-0000-000000000001',
-  'UC Santa Cruz, 4th year CS major (B.A.), graduating June 2026.
+  'UC Santa Cruz, 2nd year Business Management Economics major (B.A.), expected graduation June 2028. Located in Berkeley, CA.
 
 Experience:
-- Automation Engineer, Cush Real Estate (Jun 2025–present)
-  Led RealScout CRM platform transition and onboarded 10+ agents. Automated lead routing (90% time reduction). Built follow-up workflow that increased agent compliance by 35%. Deliver daily analytics briefs to founders translating metrics into business recommendations.
+- Head of Equity Research, Investment Banking Academy (Dec 2025–present)
+  Leads Equity Research vertical with weekly market briefings on macro trends and sector performance. Co-authors equity research reports including DCF valuation, trading comparables, and Buy/Sell/Hold recommendations. Evaluates peer stock pitches and provides structured feedback.
 
-- Sales Engineering Intern, Shockproof (May 2025)
-  Built 50-email/day outreach automation from 3,000+ contact list. Navigated complex org structures at banks to reach decision-makers. Cold calling experience.
+- Analyst, Investment Banking Academy (Jan–Dec 2025)
+  Conducted financial and strategic analysis of publicly traded companies. Completed Wall Street Prep financial modeling training. Presented valuation findings to peers and mentors.
+
+- Analyst, Santa Cruz Investment Fund (Oct 2025–present)
+  Bottom-up equity research on 5+ public companies. Built DCF and trading comps models. Presented investment recommendations in fund deliberations.
+
+- Student Consultant, Haas School of Business (Jul 2024–present)
+  Analyzed telecom usage data saving the school ~$5K annually. Implemented QC processes and drafted onboarding materials.
 
 Leadership:
-- Executive Vice President, Alpha Kappa Psi (AKPsi), Chi Gamma Chapter — current. Previously VP of Member Integration.
+- Vice President of Finance, Alpha Kappa Psi – Chi Gamma Chapter (Jan 2026–present)
+  Oversees Finance Committee, budgeting, and fundraising strategy. Organized 8+ events generating $10,000+ in revenue. Manages chapter financial ledger.
+- Member, Alpha Kappa Psi (May 2025–present)
 
-Key narrative: "I have been on the buying side of a sales engineer interaction. I evaluated RealScout, recommended it to leadership, and led the full rollout for 10+ agents. That experience made me want to do this full-time."',
+Key narrative: "I have been doing finance hands-on since my first semester — leading equity research, building DCF models at a real student fund, and managing a chapter budget. I want to bring that foundation into a professional finance role and keep building."',
 
-  'Sales outreach automation, CRM platforms (RealScout, HubSpot), workflow automation, B2B prospecting, cold calling, technical demos, Python, JavaScript/TypeScript, Next.js, Supabase, Claude API, data analysis, translating technical concepts for non-technical buyers',
+  'DCF valuation, trading comparables, sensitivity analysis, bottom-up equity research, Buy/Sell/Hold reports, financial modeling (Wall Street Prep certified), Excel, Python, PowerPoint, Google Sheets, budgeting, financial ledger management. Languages: English (native), Spanish (fluent).',
 
-  'Target roles: SDR, BDR, Sales Engineering, Solutions Engineering, Account Executive (entry), GTM roles at AI/automation/SaaS companies.
-Location: SF Bay Area — East Bay and Santa Cruz base. Happy to be in-person in SF.
-Target comp: $70–90k base with clear path to $100k+.
-Industry preference: AI, automation, real estate tech, SaaS.
-Cover letter style: Story-driven, leads with genuine company interest. Strong closer with a logistics/availability line. Best when it tells a specific story rather than listing accomplishments formulaically.'
+  'Target roles: Investment Banking Intern, Summer Analyst, Equity Research Intern, Private Equity Intern, Wealth Management Intern, Financial Analyst Intern, M&A Intern, Capital Markets Intern, Asset Management Intern.
+Location: SF Bay Area, New York City, or Remote.
+Salary: Paid preferred; open to unpaid/for-credit at reputable firms.
+Industry: Finance only — IB, PE, WM, asset management, hedge funds, VC. No insurance sales, MLM, or staffing agencies.
+Cover letter style: Professional and structured. Opens with genuine interest in the specific firm or role. Names specific experience (DCF models, fund analysis, $10K fundraising). No filler phrases. Under one page.'
 ) on conflict (id) do nothing;
