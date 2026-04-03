@@ -1,93 +1,82 @@
 {
   "search_terms": [
-    "Sales Development Representative",
-    "Business Development Representative",
-    "SDR tech",
-    "BDR SaaS",
-    "Sales Engineer entry level",
-    "Solutions Engineer entry level",
-    "Associate Solutions Engineer",
-    "Junior Solutions Engineer",
-    "Pre-Sales Engineer entry level",
-    "Solutions Architect entry level",
-    "Associate Sales Engineer",
-    "Solutions Consultant entry level",
-    "Technical Account Manager entry level",
-    "Customer Solutions Engineer",
-    "Pre-Sales Solutions Engineer",
-    "Account Development Representative",
-    "Technical Sales Associate",
-    "Account Executive entry level",
-    "Go To Market entry level"
+    "Investment Banking Analyst entry level",
+    "Investment Banking Associate entry level",
+    "Equity Research Analyst entry level",
+    "Private Equity Analyst entry level",
+    "Wealth Management Analyst entry level",
+    "Financial Analyst entry level",
+    "Corporate Finance Analyst entry level",
+    "Mergers and Acquisitions Analyst entry level",
+    "Capital Markets Analyst entry level",
+    "Portfolio Analyst entry level"
   ],
   "intern_search_terms": [
-    "Sales intern tech",
-    "Business Development intern",
-    "Sales Engineering intern",
-    "Solutions Engineering intern",
-    "Pre-Sales intern",
-    "Technical Account Manager intern",
-    "GTM intern",
-    "Go to market intern"
-  ],
-  "prompt_eng_search_terms": [
-    "Prompt Engineer",
-    "Prompt Engineer entry level",
-    "AI Engineer entry level",
-    "LLM Engineer entry level",
-    "AI Automation Engineer",
-    "Generative AI Engineer entry level"
-  ],
-  "comms_search_terms": [
-    "Developer Advocate entry level",
-    "Developer Relations entry level",
-    "Developer Evangelist entry level",
-    "Marketing Communications entry level tech",
-    "Community Manager tech",
-    "Content Marketing entry level SaaS",
-    "Technical Community Manager"
+    "Investment Banking intern",
+    "Investment Banking summer analyst",
+    "Equity Research intern",
+    "Private Equity intern",
+    "Wealth Management intern",
+    "Financial Analyst intern",
+    "Corporate Finance intern",
+    "M&A intern",
+    "Mergers and Acquisitions intern",
+    "Capital Markets intern",
+    "Asset Management intern",
+    "Venture Capital intern",
+    "Hedge Fund intern",
+    "Portfolio Management intern",
+    "Finance intern",
+    "DCF modeling intern",
+    "Valuation intern"
   ],
   "locations": [
     "San Francisco, CA",
     "Oakland, CA",
     "San Jose, CA",
+    "Palo Alto, CA",
+    "Menlo Park, CA",
     "Redwood City, CA",
-    "Menlo Park, CA"
+    "New York, NY",
+    "Remote"
   ],
   "watchlist_companies": [
-    "netflix", "anthropic", "openai", "nvidia", "databricks", "snowflake",
-    "salesforce", "stripe", "figma", "notion", "palantir", "scale ai",
-    "cohere", "mistral", "groq", "together ai", "perplexity", "cursor",
-    "linear", "vercel", "cloudflare", "hashicorp", "confluent",
-    "sigma computing"
+    "goldman sachs", "jpmorgan", "morgan stanley", "bank of america", "citigroup",
+    "wells fargo", "lazard", "evercore", "moelis", "houlihan lokey",
+    "piper sandler", "william blair", "rbc capital markets", "jefferies",
+    "blackstone", "kkr", "apollo", "carlyle", "tpg", "general atlantic",
+    "sequoia capital", "andreessen horowitz", "kleiner perkins",
+    "fidelity", "vanguard", "blackrock", "charles schwab", "ubs",
+    "barclays", "credit suisse", "deutsche bank", "nomura",
+    "cowen", "raymond james", "stifel", "baird",
+    "financial technology partners", "qatalyst partners"
   ],
   "high_conversion_companies": [
-    "salesforce", "google", "microsoft", "amazon", "meta", "stripe",
-    "databricks", "snowflake", "okta", "hubspot", "zendesk", "twilio",
-    "box", "dropbox", "workday", "servicenow", "splunk", "crowdstrike",
-    "palo alto networks", "zscaler", "cloudflare", "hashicorp", "confluent",
-    "figma", "notion", "anthropic", "openai", "nvidia", "netflix",
-    "adobe", "intuit", "cisco", "oracle", "mongodb", "elastic",
-    "datadog", "new relic", "sigma computing"
+    "goldman sachs", "jpmorgan", "morgan stanley", "bank of america", "citigroup",
+    "wells fargo", "lazard", "evercore", "moelis", "houlihan lokey",
+    "blackstone", "kkr", "apollo", "carlyle", "fidelity", "blackrock",
+    "charles schwab", "ubs", "barclays", "jefferies", "raymond james",
+    "piper sandler", "william blair", "baird", "stifel"
   ],
   "exclude_industries": [
-    "hospital", "clinic", "insurance", "legal",
-    "law firm", "pharmaceutical", "pharma", "dental", "therapy", "staffing",
-    "recruiting agency", "we are hiring on behalf"
+    "insurance sales", "mlm", "multi-level marketing", "pyramid",
+    "staffing agency", "recruiting agency", "we are hiring on behalf",
+    "hospital", "clinic", "pharmaceutical", "pharma", "dental",
+    "therapy", "law firm", "legal", "real estate sales"
   ],
   "repost_signals": [
     "repost", "re-post", "reposting", "re-posting",
     "previously posted", "originally posted", "posting again",
     "reactivated", "re-listed", "relisted", "re-opening"
   ],
-  "nonsales_titles": [
+  "nonfinance_titles": [
     "software engineer", "data engineer", "mechanical engineer",
     "electrical engineer", "hardware engineer", "systems engineer",
     "civil engineer", "structural engineer", "chemical engineer",
     "nurse", "physician", "therapist", "dentist", "teacher",
-    "scientist", "researcher", "accountant",
-    "attorney", "paralegal", "park technician", "swim coach",
+    "scientist", "researcher", "attorney", "paralegal",
     "manufacturing engineer", "controls engineer", "field service",
-    "penetration tester", "cybersecurity analyst"
+    "penetration tester", "cybersecurity analyst",
+    "marketing coordinator", "graphic designer", "social media manager"
   ]
 }
